@@ -5,27 +5,29 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import AddressInput from "../components/AddressInput";
+import EmploymentAddress from "../pages/EmploymentAddress";
+import PropertyAddress from "../pages/PropertyAddress";
+import ResidentialAddress from "../pages/ResidentialAddress";
+import { useDispatch, useSelector } from "react-redux";
+import { next, previous } from "../store/pagesSlice";
 
-const steps = [
-	"Residential Address",
-	"Property Address",
-	"Employment Address",
-];
+const steps = ["Residential Address", "Property Address", "Employment Address"];
+
+
 
 export default function Main() {
-	const [activeStep, setActiveStep] = React.useState(0);
-	const [skipped, setSkipped] = React.useState(new Set());
+    const activeStep = useSelector((state) => state.pages.activePage);
+    const nextDisabled = useSelector((state) => state.pages.nextDisabled);
+    const dispatch = useDispatch();
 
-	const isStepOptional = (step) => {
-		return step === 1;
-	};
+	const [skipped, setSkipped] = React.useState(new Set());
 
 	const isStepSkipped = (step) => {
 		return skipped.has(step);
 	};
 
 	const handleNext = () => {
+        /*
 		let newSkipped = skipped;
 		if (isStepSkipped(activeStep)) {
 			newSkipped = new Set(newSkipped.values());
@@ -33,30 +35,23 @@ export default function Main() {
 		}
 
 		setActiveStep((prevActiveStep) => prevActiveStep + 1);
-		setSkipped(newSkipped);
+		setSkipped(newSkipped);*/
+        dispatch(next());
 	};
+
+    const pages = {
+			"Residential Address": <ResidentialAddress handleNext={handleNext} />,
+			"Property Address": <PropertyAddress />,
+			"Employment Address": <EmploymentAddress />,
+		};
 
 	const handleBack = () => {
-		setActiveStep((prevActiveStep) => prevActiveStep - 1);
-	};
-
-	const handleSkip = () => {
-		if (!isStepOptional(activeStep)) {
-			// You probably want to guard against something like this,
-			// it should never occur unless someone's actively trying to break something.
-			throw new Error("You can't skip a step that isn't optional.");
-		}
-
-		setActiveStep((prevActiveStep) => prevActiveStep + 1);
-		setSkipped((prevSkipped) => {
-			const newSkipped = new Set(prevSkipped.values());
-			newSkipped.add(activeStep);
-			return newSkipped;
-		});
+		//setActiveStep((prevActiveStep) => prevActiveStep - 1);
+        dispatch(previous());
 	};
 
 	const handleReset = () => {
-		setActiveStep(0);
+		console.log("holi")
 	};
 
 	return (
@@ -65,11 +60,6 @@ export default function Main() {
 				{steps.map((label, index) => {
 					const stepProps = {};
 					const labelProps = {};
-					if (isStepOptional(index)) {
-						labelProps.optional = (
-							<Typography variant="caption">Optional</Typography>
-						);
-					}
 					if (isStepSkipped(index)) {
 						stepProps.completed = false;
 					}
@@ -92,8 +82,8 @@ export default function Main() {
 				</React.Fragment>
 			) : (
 				<React.Fragment>
-					<Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography>
-					<AddressInput />
+					<Box sx={{ py: 4 }}>{pages[steps[activeStep]]}</Box>
+
 					<Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
 						<Button
 							color="inherit"
@@ -104,13 +94,8 @@ export default function Main() {
 							Back
 						</Button>
 						<Box sx={{ flex: "1 1 auto" }} />
-						{isStepOptional(activeStep) && (
-							<Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-								Skip
-							</Button>
-						)}
 
-						<Button onClick={handleNext}>
+						<Button disabled={nextDisabled} onClick={handleNext}>
 							{activeStep === steps.length - 1 ? "Finish" : "Next"}
 						</Button>
 					</Box>

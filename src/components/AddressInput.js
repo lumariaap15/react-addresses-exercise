@@ -5,15 +5,9 @@ import MenuItem from "@mui/material/MenuItem";
 import { CanadaProvinces } from "../helpers/CanadaProvinces";
 import useValidation from "../hooks/useValidation";
 
-export default function AddressInput() {
-	const [formIsValid, setFormIsValid] = useState(false);
-	const [formValues, setFormValues] = useState({
-		streetNumber: "",
-		streetName: "",
-		city: "",
-		province: "",
-		code: "",
-	});
+export default function AddressInput({ setAddress, formHasErrors, initialValues }) {
+
+	const [formValues, setFormValues] = useState(initialValues);
 	const [streetNumValidation] = useValidation(formValues.streetNumber, [
 		"required",
 		"numeric",
@@ -36,36 +30,34 @@ export default function AddressInput() {
 		"maxLengthCode",
 	]);
 
-	const formValuesInvalid = () => {
+	const formValuesEmpty = () => {
 		for (let val in formValues) {
-			if (val.length === 0) {
+			if (formValues[val].length === 0) {
 				return true;
 			}
 		}
-
 		return false;
 	};
 
 	useEffect(() => {
+        let formEmptyFields = formValuesEmpty();
 		if (
 			streetNumValidation.hasError ||
 			streetNameValidation.hasError ||
 			provinceValidation.hasError ||
 			codeValidation.hasError ||
-			formValuesInvalid()
+			formEmptyFields
 		) {
-			setFormIsValid(false);
+			formHasErrors(true);
 		} else {
-			setFormIsValid(true);
+			formHasErrors(false);
 		}
-	}, [
-		formValues,
-		streetNumValidation,
-		streetNameValidation,
-		cityValidation,
-		provinceValidation,
-		codeValidation
-	]);
+        /*
+		setAddress(
+			`${formValues.streetNumber} ${formValues.streetName} ${formValues.city} ${formValues.province} ${formValues.code}`
+		);*/
+        setAddress(formValues);
+	}, [formValues]);
 
 	const handleFormChange = (event, key) => {
 		let val = event.target.value;
@@ -85,7 +77,6 @@ export default function AddressInput() {
 			autoComplete="off"
 		>
 			<div>
-            {formIsValid ? "valid" : "invalid"}
 				<TextField
 					id="filled-error"
 					label="Street Number"

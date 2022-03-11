@@ -3,8 +3,9 @@ import Typography from "@mui/material/Typography";
 import { useDispatch, useSelector } from "react-redux";
 import { setResidentialAddress } from "../store/addressesSlice";
 import { changePageState } from "../store/pagesSlice";
+import { pageNumbers } from "../helpers/Constants";
 
-function ResidentialAddress({ handleNext }) {
+function ResidentialAddress() {
 	const dispatch = useDispatch();
 	const initialValues = useSelector(
 		(state) => state.addresses.residentialAddress
@@ -15,7 +16,7 @@ function ResidentialAddress({ handleNext }) {
 	};
 
 	const formHasErrors = (val) => {
-		dispatch(changePageState({page: 0, invalid: val}));
+		dispatch(changePageState({page: pageNumbers.residential, invalid: val}));
 	};
 
 	return (

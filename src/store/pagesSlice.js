@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { pageNumbers } from "../helpers/Constants";
 
 const initialState = {
-	activePage: 2,
+	activePage: pageNumbers.residential,
 	nextDisabled: true,
     residentialPageInvalid: false,
     propertyPageInvalid: false,
@@ -22,9 +23,9 @@ export const pagesSlice = createSlice({
 			state.activePage -= 1;
 		},
 		changePageState: (state, {payload}) => {
-			if(payload.page === 0){
+			if(payload.page === pageNumbers.residential){
                 state.residentialPageInvalid = payload.invalid;
-            } else if(payload.page === 1){
+            } else if(payload.page === pageNumbers.property){
                 state.propertyPageInvalid = payload.invalid;
             }else{
                 state.employmentPageInvalid = payload.invalid;

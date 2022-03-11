@@ -21,6 +21,8 @@ const initialState = {
 		city: "",
 		province: "",
 		code: "",
+		employmentName: "",
+		employmentType: "",
 	},
 	previousEmploymentAddress: [],
 };
@@ -38,11 +40,18 @@ export const addressesSlice = createSlice({
 		setEmploymentAddress: (state, action) => {
 			state.employmentAddress = action.payload;
 		},
+		setPreviousEmploymentAddress: (state, action) => {
+			state.previousEmploymentAddress[action.payload.idx] = action.payload.val; 
+		},
 	},
 });
 
 // Action creators are generated for each case reducer function
-export const { setResidentialAddress, setPropertyAddress, setEmploymentAddress } =
-	addressesSlice.actions;
+export const {
+	setResidentialAddress,
+	setPropertyAddress,
+	setEmploymentAddress,
+	setPreviousEmploymentAddress,
+} = addressesSlice.actions;
 
 export default addressesSlice.reducer;

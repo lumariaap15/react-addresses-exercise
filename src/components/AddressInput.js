@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import { CanadaProvinces } from "../helpers/CanadaProvinces";
 import useValidation from "../hooks/useValidation";
+import { useSelector } from "react-redux";
+import { pageNumbers } from "../helpers/Constants";
 
 export default function AddressInput({ setAddress, formHasErrors, initialValues }) {
 
 	const [formValues, setFormValues] = useState(initialValues);
+	const page = useSelector(state => state.pages.activePage);
 	const [streetNumValidation] = useValidation(formValues.streetNumber, [
 		"required",
 		"numeric",
@@ -52,10 +55,6 @@ export default function AddressInput({ setAddress, formHasErrors, initialValues 
 		} else {
 			formHasErrors(false);
 		}
-        /*
-		setAddress(
-			`${formValues.streetNumber} ${formValues.streetName} ${formValues.city} ${formValues.province} ${formValues.code}`
-		);*/
         setAddress(formValues);
 	}, [formValues]);
 
@@ -77,8 +76,36 @@ export default function AddressInput({ setAddress, formHasErrors, initialValues 
 			autoComplete="off"
 		>
 			<div>
+				{page === pageNumbers.employment ? (
+					<React.Fragment>
+						<TextField
+							id="filled-error"
+							label="Employment Name"
+							variant="filled"
+							value={formValues.employmentName}
+							onChange={(e) => {
+								handleFormChange(e, "employmentName");
+							}}
+						/>
+						<TextField
+							id="filled-error"
+							label="Employment Type"
+							select
+							variant="filled"
+							value={formValues.employmentType}
+							onChange={(e) => {
+								handleFormChange(e, "employmentType");
+							}}
+						>
+							{["Employed", "Retired", "Student"].map((option) => (
+								<MenuItem key={option} value={option}>
+									{option}
+								</MenuItem>
+							))}
+						</TextField>
+					</React.Fragment>
+				) : null}
 				<TextField
-					id="filled-error"
 					label="Street Number"
 					variant="filled"
 					value={formValues.streetNumber}
@@ -87,10 +114,8 @@ export default function AddressInput({ setAddress, formHasErrors, initialValues 
 					}}
 					error={streetNumValidation.hasError}
 					helperText={streetNumValidation.error}
-					type="number"
 				/>
 				<TextField
-					id="filled-error"
 					label="Street Name"
 					variant="filled"
 					value={formValues.streetName}
@@ -105,7 +130,6 @@ export default function AddressInput({ setAddress, formHasErrors, initialValues 
 					onChange={(e) => {
 						handleFormChange(e, "city");
 					}}
-					id="filled-error"
 					label="City"
 					variant="filled"
 					error={cityValidation.hasError}
@@ -123,18 +147,22 @@ export default function AddressInput({ setAddress, formHasErrors, initialValues 
 					error={provinceValidation.hasError}
 					helperText={provinceValidation.error}
 				>
-					{CanadaProvinces.map((option) => (
-						<MenuItem key={option.abbreviation} value={option.name}>
-							{option.name}
-						</MenuItem>
-					))}
+					{CanadaProvinces.map((option) => {
+						if (page === pageNumbers.property && option.name === "Quebec") {
+							return "";
+						}
+						return (
+							<MenuItem key={option.abbreviation} value={option.name}>
+								{option.name}
+							</MenuItem>
+						);
+					})}
 				</TextField>
 				<TextField
 					value={formValues.code}
 					onChange={(e) => {
 						handleFormChange(e, "code");
 					}}
-					id="filled-error"
 					label="Code"
 					variant="filled"
 					error={codeValidation.hasError}

@@ -3,6 +3,7 @@ import Typography from "@mui/material/Typography";
 import { useDispatch, useSelector } from "react-redux";
 import { setPropertyAddress } from "../store/addressesSlice";
 import { changePageState } from "../store/pagesSlice";
+import { pageNumbers } from "../helpers/Constants";
 
 function PropertyAddress() {
 	const dispatch = useDispatch();
@@ -15,7 +16,7 @@ function PropertyAddress() {
 	};
 
 	const formHasErrors = (val) => {
-		dispatch(changePageState({ page: 1, invalid: val }));
+		dispatch(changePageState({ page: pageNumbers.property, invalid: val }));
 	};
 
 	return (

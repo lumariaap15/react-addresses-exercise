@@ -2,13 +2,30 @@ import React, { useState, useEffect } from "react";
 import AddressInput from "../components/AddressInput";
 import Typography from "@mui/material/Typography";
 import { useDispatch, useSelector } from "react-redux";
-import { setEmploymentAddress } from "../store/addressesSlice";
+import {
+	setEmploymentAddress,
+	setPreviousEmploymentAddress,
+} from "../store/addressesSlice";
 import { changePageState } from "../store/pagesSlice";
 import TextField from "@mui/material/TextField";
+import { pageNumbers } from "../helpers/Constants";
 
 function EmploymentAddress() {
-	const [previousEmployments, setPreviousEmployments] = useState(0);
+	const initialPreviousEmploymentsValues = useSelector(
+		(state) => state.addresses.previousEmploymentAddress
+	);
+
+	//number of prev employments
+	const [previousEmployments, setPreviousEmployments] = useState(
+		initialPreviousEmploymentsValues.length
+	);
+	//array with integers (indexes)
 	const [previousEmploymentsArr, setPreviousEmploymentsArr] = useState([]);
+	//array with booleans indicating which forms have errors
+	const [previousEmploymentsErrors, setPreviousEmploymentsErrors] = useState(
+		[]
+	);
+	const [currentEmploymentError, setCurrentEmploymentError] = useState(true);
 	const dispatch = useDispatch();
 	const initialValues = useSelector(
 		(state) => state.addresses.employmentAddress
@@ -18,19 +35,53 @@ function EmploymentAddress() {
 		dispatch(setEmploymentAddress(val));
 	};
 
+	const setPreviousEmploymentsAddress = (val, idx) => {
+		dispatch(setPreviousEmploymentAddress({ val, idx }));
+	};
+
 	const handlePreviousEmployments = (e) => {
-		console.log(e.target.value);
 		setPreviousEmployments(e.target.value);
 	};
 
 	const formHasErrors = (val) => {
-		dispatch(changePageState({ page: 2, invalid: val }));
+		setCurrentEmploymentError(val);
 	};
+
+	const formPreviousHasErrors = (val, idx) => {
+		let arr = [...previousEmploymentsErrors];
+		arr[idx] = val;
+		setPreviousEmploymentsErrors(arr);
+	};
+
+	useEffect(() => {
+		let hasError = false;
+		previousEmploymentsErrors.forEach((val) => {
+			if (val) {
+				hasError = true;
+			}
+		});
+		if (currentEmploymentError) {
+			hasError = true;
+		}
+		dispatch(changePageState({ page: pageNumbers.employment, invalid: hasError }));
+	}, [currentEmploymentError, previousEmploymentsErrors]);
 
 	useEffect(() => {
 		var arr = [];
 		for (var i = 0; i < previousEmployments; i++) {
 			arr.push(i);
+			if (!initialPreviousEmploymentsValues[i]) {
+				setPreviousEmploymentsAddress(
+					{
+						streetNumber: "",
+						streetName: "",
+						city: "",
+						province: "",
+						code: "",
+					},
+					i
+				);
+			}
 		}
 		setPreviousEmploymentsArr(arr);
 	}, [previousEmployments]);
@@ -54,14 +105,18 @@ function EmploymentAddress() {
 				type="number"
 			/>
 			{previousEmploymentsArr.map((value) => (
-				<React.Fragment>
+				<React.Fragment key={value}>
 					<Typography sx={{ mt: 3, pl: 1 }} variant="h6">
 						Employment {value + 1}
 					</Typography>
 					<AddressInput
-						setAddress={setAddress}
-						formHasErrors={formHasErrors}
-						initialValues={initialValues}
+						setAddress={(e) => {
+							setPreviousEmploymentsAddress(e, value);
+						}}
+						formHasErrors={(e) => {
+							formPreviousHasErrors(e, value);
+						}}
+						initialValues={initialPreviousEmploymentsValues[value]}
 					/>
 				</React.Fragment>
 			))}
